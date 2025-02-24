@@ -1,33 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>机械工程题目测试</title>
+    <title>机械工程试题测验</title>
     <style>
-        .wrong-question { margin-bottom: 20px; }
-        .correct { color: red; }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .question {
+            margin: 15px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .options {
+            margin: 10px 0;
+        }
+        .option {
+            display: block;
+            margin: 5px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+        }
+        .error {
+            color: red;
+            margin: 10px 0;
+        }
+        #passwordOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #passwordBox {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
     </style>
 </head>
-<body onload="checkDate()">
-<div id="expiredMessage" style="display: none; color: red; font-size: 24px;">
-    网页已过期，无法访问。
+<body>
+<div id="passwordOverlay">
+    <div id="passwordBox">
+        <h2>请输入密码</h2>
+        <input type="password" id="passwordInput">
+        <button onclick="checkPassword()">确认</button>
+        <p id="passwordError" style="color: red; display: none;">密码错误，请重试</p>
+    </div>
 </div>
-
-<div id="passwordSection" style="display: none;">
-    <h3>请输入访问密码：</h3>
-    <input type="password" id="passwordInput">
-    <button onclick="checkPassword()">提交密码</button>
-</div>
-
-<div id="mainContent" style="display: none;">
-    <div id="questionsContainer"></div>
-    <button onclick="submitAnswers()" style="margin-top: 20px;">提交答案</button>
-    <div id="results"></div>
+<div class="container" id="quizContainer" style="display: none;">
+    <h1>机械工程试题测验</h1>
+    <form id="quizForm"></form>
+    <button onclick="checkAnswers()">提交答案</button>
+    <div id="result"></div>
 </div>
 
 <script>
+    // 题目数据
     const questions = [
-        {
+           {
             question: "铸铁中平均含碳量一般为",
             options: ["A: 0.2%", "B: 0.7%", "C: 1.5%", "D: >2.11%"],
             correct: "D"
@@ -832,94 +886,83 @@
             options: ["A: 粗实线", "B: 细实线", "C: 细点画线", "D: 虚线"],
             correct: "B"
         }
+        // 其他题目依此类推添加...
     ];
 
-
-
-
-    function checkDate() {
-        const deadline = new Date(2025, 7, 19, 12, 55);
-        if (new Date() > deadline) {
-            document.getElementById('expiredMessage').style.display = 'block';
-            return;
-        }
-        document.getElementById('passwordSection').style.display = 'block';
+    // 动态生成题目
+    function createQuiz() {
+        const form = document.getElementById('quizForm');
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.innerHTML = `
+                        <div>${index + 1}. ${q.question}</div>
+                        <div class="options">
+                            ${q.options.map(opt => `
+                                <label class="option">
+                                    <input type="radio" name="q${index}" value="${opt[0]}">
+                                    ${opt}
+                                </label>
+                            `).join('')}
+                        </div>
+                    `;
+            form.appendChild(questionDiv);
+        });
     }
 
-    function checkPassword() {
-        const password = document.getElementById('passwordInput').value;
-        if (password === '222') {
-            document.getElementById('passwordSection').style.display = 'none';
-            initializeTest();
-        } else {
-            alert('密码错误！');
-        }
-    }
+    // 检查答案
+    function checkAnswers() {
+        let correctCount = 0;
+        const errors = [];
 
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
+        questions.forEach((q, index) => {
+            const selected = document.querySelector(`input[name="q${index}"]:checked`);
+            const userAnswer = selected ? selected.value : "未作答";
 
-    function initializeTest() {
-        const shuffled = shuffleArray([...questions]);
-        window.selectedQuestions = shuffled.slice(0, 20);
-
-        const questionsHTML = window.selectedQuestions.map((q, idx) => `
-                <div class="question">
-                    <h3>${idx + 1}. ${q.question}</h3>
-                    ${q.options.map(opt => `
-                        <label>
-                            <input type="radio" name="q${idx}" value="${opt[0]}">
-                            ${opt}
-                        </label><br>
-                    `).join('')}
-                </div>
-            `).join('');
-
-        document.getElementById('questionsContainer').innerHTML = questionsHTML;
-        document.getElementById('mainContent').style.display = 'block';
-    }
-
-    function submitAnswers() {
-        let correct = 0, wrong = 0;
-        const wrongList = [];
-
-        window.selectedQuestions.forEach((q, idx) => {
-            const selected = document.querySelector(`input[name="q${idx}"]:checked`);
-            if (!selected) {
-                wrong++;
-                wrongList.push({...q, userAns: null});
-                return;
-            }
-
-            if (selected.value === q.correct) {
-                correct++;
+            if (userAnswer === q.correct) {
+                correctCount++;
             } else {
-                wrong++;
-                wrongList.push({...q, userAns: selected.value});
+                errors.push({
+                    question: q.question,
+                    userAnswer,
+                    correctAnswer: q.correct
+                });
             }
         });
 
-        const resultsHTML = `
-                <h2>正确：${correct}题，错误：${wrong}题</h2>
-                ${wrongList.map(item => `
-                    <div class="wrong-question">
-                        <h3 style="color: black;">${item.question}</h3>
-                        ${item.options.map(opt => {
-            let style = 'color: black;';
-            if (opt.startsWith(item.correct)) style = 'color: red;';
-            if (item.userAns && opt.startsWith(item.userAns)) style = 'color: blue; text-decoration: line-through;';
-            return `<p style="${style}">${opt}</p>`;
-        }).join('')}
-                    </div>
-                `).join('')}
-            `;
+        // 显示结果
+        const resultDiv = document.getElementById('result');
+        let html = `<h3>答题结果：</h3>
+                          <p>正确题数：${correctCount}/${questions.length}</p>`;
 
-        document.getElementById('results').innerHTML = resultsHTML;
+        if (errors.length > 0) {
+            html += `<h4>错误题目：</h4>`;
+            errors.forEach(error => {
+                html += `<div class="error">
+                            <p>题目：${error.question}</p>
+                            <p>您的答案：${error.userAnswer}</p>
+                            <p>正确答案：${error.correctAnswer}</p>
+                        </div>`;
+            });
+        }
+
+        resultDiv.innerHTML = html;
+    }
+
+    // 检查密码
+    function checkPassword() {
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordError = document.getElementById('passwordError');
+        const passwordOverlay = document.getElementById('passwordOverlay');
+        const quizContainer = document.getElementById('quizContainer');
+
+        if (passwordInput.value === "2025") {
+            passwordOverlay.style.display = "none";
+            quizContainer.style.display = "block";
+            createQuiz();
+        } else {
+            passwordError.style.display = "block";
+        }
     }
 </script>
 </body>
