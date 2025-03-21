@@ -1,143 +1,448 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>机械工程试题测验</title>
+    <title>钳工证理论历年真题（机械基础部分）</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
+        body { 
+            font-size: 30px;
+            margin: 0;
+            padding: 20px;
+        }
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
-            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
         }
-        .question {
-            margin: 15px 0;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+        .credit { 
+            font-size: 40px !important;
+            color: red;
+            margin-bottom: 25px;
+            text-align: center;
         }
-        .options {
-            margin: 10px 0;
+        .input-group {
+            margin: 40px 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
-        .option {
-            display: block;
-            margin: 5px 0;
+        .button-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            gap: 20px;
         }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
+        .input-group h3 {
+            font-size: 36px !important;
+            margin: 20px 0;
+            color: #333;
+        }
+        .name-select, .input-field {
+            width: 800px;
+            padding: 30px;
+            border: 4px solid #ddd;
+            border-radius: 4px;
+            font-size: 32px !important;
+            transition: border-color 0.3s;
+        }
+        .action-btn {
+            font-size: 32px !important;
+            padding: 30px 60px;
+            background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
+            transition: background 0.3s;
         }
-        button:hover {
-            background-color: #45a049;
+        .timer {
+            position: fixed;
+            top: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px !important;
+            font-weight: bold;
+            color: #ff4757;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
         }
-        #result {
-            margin-top: 20px;
-            padding: 15px;
-            border: 1px solid #ddd;
+        .question {
+            padding: 40px;
+            margin: 40px 0;
+            border: 1px solid #ccc;
+            width: 100%;
+            height: 100%;
         }
-        .error {
+        input[type="radio"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 60px;
+            height: 60px;
+            border: 4px solid #ddd;
+            border-radius: 50%;
+            margin-right: 30px;
+            vertical-align: middle;
+            position: relative;
+            top: -5px;
+        }
+        input[type="radio"]:checked {
+            background: #4CAF50;
+            border-color: #4CAF50;
+        }
+        .correct-answer { 
+            color: green !important;
+            font-weight: bold;
+        }
+        .wrong-answer { 
+            color: red !important;
+            text-decoration: line-through;
+        }
+        .back-btn { 
+            background: #2196F3;
+            margin: 20px auto !important;
+            display: block;
+        }
+        #nextBtn { background: #FF9800; }
+        #submitAnswerBtn { background: #009688; }
+        .error-tips {
             color: red;
-            margin: 10px 0;
+            font-size: 25px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .result-container {
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+            width: 100%;
+            text-align: center;
+        }
+
+        @media screen and (max-width: 1600px) {
+            .container { width: 95%; padding: 10px; }
+            .name-select, .input-field { 
+                width: 100%; 
+                padding: 20px;
+                font-size: 28px !important;
+            }
+            .action-btn { 
+                width: 100%; 
+                padding: 20px;
+                font-size: 28px !important;
+            }
+            .question { padding: 20px; margin: 20px 0; }
+            input[type="radio"] { 
+                width: 40px; 
+                height: 40px; 
+                margin-right: 15px;
+                top: -3px;
+            }
+            .error-tips { font-size: 40px; }
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>机械工程试题测验</h1>
-    <form id="quizForm"></form>
-    <button onclick="checkAnswers()">提交答案</button>
-    <div id="result"></div>
-</div>
+<div style="position: fixed; top: 10px; right: 20px; font-size: 16px; color: #666; z-index: 9999;">正二进制出品</div>
+    <div class="container">
+        <div id="passwordScreen">
+            <div class="credit">由高州一职 Mr黎 制作</div>
+            <div class="input-group">
+                <h3>请选择您的姓名：</h3>
+                <select id="nameSelect" class="name-select">
+                    <option value="" disabled selected>请选择姓名</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <h3>请输入访问密码：</h3>
+                <input type="password" id="passwordInput" class="input-field" placeholder="密码">
+            </div>
+            <div class="button-container">
+                <button class="action-btn" id="startBtn">进入系统</button>
+            </div>
+        </div>
+        
+        <div id="quizScreen" style="display: none;">
+            <div id="timer" class="timer">05:00</div>
+            <div id="currentQuestion"></div>
+            <div class="button-container">
+                <button class="action-btn" id="submitAnswerBtn">确定答案</button>
+                <button class="action-btn" id="nextBtn" style="display: none;">下一题</button>
+            </div>
+        </div>
 
-<script>
-    // 题目数据
-    const questions = [
-        {
-            question: "牌号HT200表示的材料是",
-            options: ["A: 碳钢", "B: 合金钢", "C: 铸铁", "D: 黄铜"],
-            correct: "C"
-        },
-        {
-            question: "铸铁中平均含碳量一般为",
-            options: ["A: 0.2%", "B: 0.7%", "C: 1.5%", "D: >2.11%"],
-            correct: "D"
-        },
-        {
-            question: "被连接件的孔都不切制螺纹的螵纹联接是",
-            options: ["A: 螺栓联接", "B:双头螺柱联接", "C:螺钉联接", "D: 紧定螺钉联接"],
-            correct: "A"
-        },
+        <div id="resultScreen" style="display: none;">
+            <button class="action-btn back-btn" id="resetBtn">返回首页</button>
+            <div id="finalResult">
+                <h2 style="color:#2196F3; text-align: center;">考生姓名：</h2>
+                <div class="score" style="text-align: center;"></div>
+                <h3 style="text-align: center;"></h3>
+                <div class="result-container"></div>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        (() => {
+            const CONFIG = {
+                password: '2426',
+                examTime: 5,
+                totalQuestions: 20,
+                scorePerQuestion: 5
+            };
 
-        // 其他题目依此类推添加...
-    ];
+            const studentList = [
+                "邱日强", "黄火明", "杨名驰", "朱立乾", "邱耀铭", "葛金鹏", "梁皓轩",
+                "郭恩瑞", "程剑豪", "罗远昊", "江柏冠", "卢宝增", "邓镇权", "黄庆飞",
+                "谢泽高", "冯麟斌", "卢子豪", "张超城", "黄析俊", "黄永霖", "李鼎",
+                "邓鸿镇", "黄培轩", "彭家乐", "黄新铧", "谢国永", "曾俊烽", "杨永建",
+                "陈继贤", "刘金灿", "袁乐清", "朱冠帆", "张广隆", "梁国亮", "梁燕辰",
+                "陈江南", "林浩宇", "蔡伟杰", "林松海", "吕仁才", "韦悦", "石江涛",
+                "宁颢然", "刘付煜毅", "梁志鑫", "赖兆霆", "张梓钥", "冯子强", "陈家庆",
+                "陈锡基", "苏子聪"
+            ];
+// 删除原 questions 数组定义，替换为：
+let questions = [];
 
-    // 动态生成题目
-    function createQuiz() {
-        const form = document.getElementById('quizForm');
-        questions.forEach((q, index) => {
-            const questionDiv = document.createElement('div');
-            questionDiv.className = 'question';
-            questionDiv.innerHTML = `
-                    <div>${index + 1}. ${q.question}</div>
-                    <div class="options">
-                        ${q.options.map(opt => `
-                            <label class="option">
-                                <input type="radio" name="q${index}" value="${opt[0]}">
-                                ${opt}
-                            </label>
-                        `).join('')}
-                    </div>
-                `;
-            form.appendChild(questionDiv);
-        });
-    }
+// 在 init() 函数开头添加题库加载逻辑
+function init() {
+  fetch('questions.json')
+    .then(response => response.json())
+    .then(data => {
+      questions = data;
+      // 初始化学生名单等后续操作
+      studentList.forEach(student => {
+        // 原初始化代码...
+      });
+    })
+    .catch(error => {
+      console.error('题库加载失败:', error);
+      alert("题库加载失败，请检查网络或文件路径！");
+    });
+  
+  // 其他初始化代码...
+}
 
-    // 检查答案
-    function checkAnswers() {
-        let correctCount = 0;
-        const errors = [];
+            let state = {
+                currentQuestionIndex: 0,
+                userAnswers: {},
+                userName: '',
+                countdownTimer: null,
+                selectedQuestions: []
+            };
 
-        questions.forEach((q, index) => {
-            const selected = document.querySelector(`input[name="q${index}"]:checked`);
-            const userAnswer = selected ? selected.value : "未作答";
+            const elements = {
+                passwordScreen: document.getElementById('passwordScreen'),
+                quizScreen: document.getElementById('quizScreen'),
+                resultScreen: document.getElementById('resultScreen'),
+                nameSelect: document.getElementById('nameSelect'),
+                passwordInput: document.getElementById('passwordInput'),
+                startBtn: document.getElementById('startBtn'),
+                currentQuestion: document.getElementById('currentQuestion'),
+                submitAnswerBtn: document.getElementById('submitAnswerBtn'),
+                nextBtn: document.getElementById('nextBtn'),
+                timer: document.getElementById('timer'),
+                finalResult: document.getElementById('finalResult'),
+                resetBtn: document.getElementById('resetBtn')
+            };
 
-            if (userAnswer === q.correct) {
-                correctCount++;
-            } else {
-                errors.push({
-                    question: q.question,
-                    userAnswer,
-                    correctAnswer: q.correct
+            function init() {
+                // 初始化学生名单
+                studentList.forEach(student => {
+                    const option = document.createElement('option');
+                    option.value = student;
+                    option.textContent = student;
+                    elements.nameSelect.appendChild(option);
                 });
+
+                // 绑定事件
+                elements.startBtn.addEventListener('click', checkPassword);
+                elements.submitAnswerBtn.addEventListener('click', checkAnswer);
+                elements.nextBtn.addEventListener('click', nextQuestion);
+                elements.resetBtn.addEventListener('click', resetSystem);
             }
-        });
 
-        // 显示结果
-        const resultDiv = document.getElementById('result');
-        let html = `<h3>答题结果：</h3>
-                      <p>正确题数：${correctCount}/${questions.length}</p>`;
+            function resetSystem() {
+                clearInterval(state.countdownTimer);
+                state = {
+                    currentQuestionIndex: 0,
+                    userAnswers: {},
+                    userName: '',
+                    countdownTimer: null,
+                    selectedQuestions: []
+                };
+                elements.passwordScreen.style.display = 'block';
+                elements.quizScreen.style.display = 'none';
+                elements.resultScreen.style.display = 'none';
+                elements.nameSelect.selectedIndex = 0;
+                elements.passwordInput.value = '';
+                window.scrollTo({ top: 0, behavior: 'instant' });
+            }
 
-        if (errors.length > 0) {
-            html += `<h4>错误题目：</h4>`;
-            errors.forEach(error => {
-                html += `<div class="error">
-                        <p>题目：${error.question}</p>
-                        <p>您的答案：${error.userAnswer}</p>
-                        <p>正确答案：${error.correctAnswer}</p>
-                    </div>`;
-            });
-        }
+            function checkPassword() {
+                const selectedName = elements.nameSelect.value;
+                const password = elements.passwordInput.value;
+                
+                if (!selectedName || selectedName === "请选择姓名") {
+                    alert("请先选择您的姓名！");
+                    return;
+                }
+                if (password !== CONFIG.password) {
+                    alert("密码错误！");
+                    return;
+                }
 
-        resultDiv.innerHTML = html;
+                state.userName = selectedName;
+                elements.passwordScreen.style.display = 'none';
+                elements.quizScreen.style.display = 'block';
+                initializeQuiz();
+                startTimer();
+            }
+
+            function startTimer() {
+                let time = CONFIG.examTime * 60;
+                state.countdownTimer = setInterval(() => {
+                    time--;
+                    const minutes = ("0" + Math.floor(time / 60)).slice(-2);
+                    const seconds = ("0" + (time % 60)).slice(-2);
+                    elements.timer.textContent = `${minutes}:${seconds}`;
+                    if (time <= 0) submitQuiz();
+                }, 1000);
+            }
+
+            function initializeQuiz() {
+                state.selectedQuestions = questions.sort(() => Math.random() - 0.5).slice(0, CONFIG.totalQuestions);
+                state.currentQuestionIndex = 0;
+                showCurrentQuestion();
+            }
+
+function showCurrentQuestion() {
+    // 清除之前的错误提示
+    document.querySelectorAll('.error-tips').forEach(el => el.remove());
+    
+    const q = state.selectedQuestions[state.currentQuestionIndex];
+    let html = `<div class="question">
+        <p>第${state.currentQuestionIndex + 1}题：${q.question}</p>
+        <div class="options">`;
+    
+    q.options.forEach(opt => {
+        const isChecked = state.userAnswers[state.currentQuestionIndex] === opt[0];
+        html += `<label>
+            <input type="radio" name="current" value="${opt[0]}" ${isChecked ? 'checked' : ''}>
+            ${opt}
+        </label><br>`;
+    });
+    
+    elements.currentQuestion.innerHTML = html + '</div></div>';
+    elements.submitAnswerBtn.style.display = 'block';
+    elements.nextBtn.style.display = 'none';
+    
+    // 重置选项颜色
+    document.querySelectorAll('label').forEach(label => {
+        label.style.color = '#333';
+    });
+}
+
+function checkAnswer() {
+    const selected = document.querySelector('input[name="current"]:checked');
+    const userAnswer = selected ? selected.value : '';
+    const q = state.selectedQuestions[state.currentQuestionIndex];
+    
+    // 显示即时反馈
+    const errorTips = document.createElement('div');
+    errorTips.className = 'error-tips';
+    if(userAnswer !== q.correct) {
+        errorTips.innerHTML = `✘ 正确答案：${q.options.find(opt => opt[0] === q.correct)}`;
+    } else {
+        errorTips.innerHTML = `✔ 回答正确`;
+        errorTips.style.color = 'green';
     }
+    document.querySelector('.error-tips')?.remove();
+    elements.currentQuestion.after(errorTips);
 
-    // 初始化题目
-    createQuiz();
-</script>
+    // 高亮答案
+    document.querySelectorAll('label').forEach(label => {
+        const optValue = label.querySelector('input').value;
+        label.style.color = optValue === q.correct ? 'green' : 
+                         (optValue === userAnswer ? 'red' : '#333');
+    });
+
+    // 保存答案
+    state.userAnswers[state.currentQuestionIndex] = userAnswer;
+    elements.submitAnswerBtn.style.display = 'none';
+    elements.nextBtn.style.display = 'block';
+}
+
+
+            function nextQuestion() {
+                state.currentQuestionIndex++;
+                if(state.currentQuestionIndex < CONFIG.totalQuestions) {
+                    showCurrentQuestion();
+                } else {
+                    submitQuiz();
+                }
+            }
+
+            function submitQuiz() {
+                clearInterval(state.countdownTimer);
+                
+                // 计算得分
+                let correctCount = 0;
+                const wrongDetails = [];
+                state.selectedQuestions.forEach((q, index) => {
+                    if(state.userAnswers[index] === q.correct) {
+                        correctCount++;
+                    } else {
+                        wrongDetails.push({
+                            ...q,
+                            number: index + 1,
+                            userAnswer: state.userAnswers[index]
+                        });
+                    }
+                });
+
+                // 显示结果
+                elements.quizScreen.style.display = 'none';
+                elements.resultScreen.style.display = 'block';
+                elements.finalResult.innerHTML = `
+                    <h2 style="color:#2196F3; text-align: center;">考生姓名：${state.userName}</h2>
+                    <div class="score" style="text-align: center;">得分：${correctCount * CONFIG.scorePerQuestion}分</div>
+                    <h3 style="text-align: center;">正确：${correctCount}题 / 总计：${CONFIG.totalQuestions}题</h3>
+                    ${wrongDetails.length ? `
+                        <div class="result-container">
+                            <h4>错题解析（共${wrongDetails.length}题）：</h4>
+                            ${wrongDetails.map(item => `
+                                <div class="wrong-question">
+                                    <p>第${item.number}题：${item.question}</p>
+                                    <div class="options">
+                                        ${item.options.map(opt => `
+                                            <div class="${opt[0] === item.correct ? 'correct-answer' : 
+                                                         opt[0] === item.userAnswer ? 'wrong-answer' : ''}">
+                                                ${opt}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div><hr>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                window.scrollTo(0, 0);
+            }
+
+            init();
+        })();
+    </script>
 </body>
 </html>
